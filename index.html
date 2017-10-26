@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta http-equiv="X-UA-Compatible" content="ie=edge">
+	<title>FCC Random Quote Generator</title>
+	<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300">
+	<style>
+		html,
+		body,
+		div,
+		span,
+		applet,
+		object,
+		iframe,
+		h1,
+		h2,
+		h3,
+		h4,
+		h5,
+		h6,
+		p,
+		blockquote,
+		pre,
+		a,
+		abbr,
+		acronym,
+		address,
+		big,
+		cite,
+		code,
+		del,
+		dfn,
+		em,
+		img,
+		ins,
+		kbd,
+		q,
+		s,
+		samp,
+		small,
+		strike,
+		strong,
+		sub,
+		sup,
+		tt,
+		var,
+		b,
+		u,
+		i,
+		center,
+		dl,
+		dt,
+		dd,
+		ol,
+		ul,
+		li,
+		fieldset,
+		form,
+		label,
+		legend,
+		table,
+		caption,
+		tbody,
+		tfoot,
+		thead,
+		tr,
+		th,
+		td,
+		article,
+		aside,
+		canvas,
+		details,
+		embed,
+		figure,
+		figcaption,
+		footer,
+		header,
+		hgroup,
+		menu,
+		nav,
+		output,
+		ruby,
+		section,
+		summary,
+		time,
+		mark,
+		audio,
+		video {
+			margin: 0;
+			padding: 0;
+			border: 0;
+			font-size: 100%;
+			font: inherit;
+			vertical-align: baseline;
+		}
+
+		/* HTML5 display-role reset for older browsers */
+
+		article,
+		aside,
+		details,
+		figcaption,
+		figure,
+		footer,
+		header,
+		hgroup,
+		menu,
+		nav,
+		section {
+			display: block;
+		}
+
+		body {
+			line-height: 1;
+		}
+
+		ol,
+		ul {
+			list-style: none;
+		}
+
+		blockquote,
+		q {
+			quotes: none;
+		}
+
+		blockquote:before,
+		blockquote:after,
+		q:before,
+		q:after {
+			content: '';
+			content: none;
+		}
+
+		table {
+			border-collapse: collapse;
+			border-spacing: 0;
+		}
+
+		body {
+			background-color: #041630;
+			font-family: 'Roboto', sans-serif;
+			font-weight: 300;
+			font-size: 1rem;
+			line-height: 1.25;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			height: 100vh;
+		}
+
+		body,
+		a {
+			color: #FFF;
+		}
+
+		#quote-wrapper,
+		.btns {
+			opacity: 0;
+			transition: opacity 0.5s;
+		}
+
+		#quote-wrapper.loaded,
+		.loaded .btns {
+			opacity: 1;
+		}
+
+		#quote-wrapper {
+			padding: 1em;
+			font-size: 1.875em;
+			text-align: center;
+			max-width: 20em;
+		}
+
+		.quote:before {
+			content: '\201C';
+		}
+
+		.quote:after {
+			content: '\201D';
+		}
+
+		.author {
+			font-size: 0.5375em;
+			margin-top: 1em;
+		}
+
+		.author:before,
+		.author:after {
+			content: '\2015';
+			margin: 0 .25em;
+		}
+
+		.error {
+			color: #B5B5B5;
+		}
+
+		.btns {
+			text-align: center;
+		}
+
+		button {
+			font-size: 1.5rem;
+			padding: 0.25em 0.375em;
+			border: none;
+			border-radius: 5px;
+			background-color: #FFF;
+			transition: background-color 0.125s;
+		}
+
+		button:hover {
+			background-color: #abccfd;
+			cursor: pointer;
+		}
+
+		@media (min-width: 46.875em) {
+			body {
+				font-size: 1.25rem;
+			}
+		}
+
+		@media (min-width: 75em) {
+			body {
+				font-size: 1.5rem;
+			}
+		}
+	</style>
+	<script src="https://use.fontawesome.com/8d9a33ecbe.js"></script>
+</head>
+
+<body>
+	<div>
+		<div id="quote-wrapper"></div>
+		<div class="btns">
+			<button class="tweet">
+				<i class="fa fa-twitter" aria-hidden="true"></i>
+			</button>
+			<button class="get-quote">
+				<i class="fa fa-refresh" aria-hidden="true"></i>
+			</button>
+		</div>
+	</div>
+	<script>
+		const wrapper = document.getElementById("quote-wrapper");
+		const btnGetQuote = document.querySelector(".get-quote");
+		const btnTweet = document.querySelector(".tweet");
+
+		function fetchQuote() {
+			fetch("https://random-quote-generator.herokuapp.com/api/quotes/random")
+				.then(data => data.json())
+				.then(data => buildQuote(data))
+				.catch(err => showError(err));
+		}
+
+		function buildQuote(obj) {
+			const quote = `<div class="quote">${obj.quote}</div>`;
+			const author = `<div class="author">${obj.author}</div>`;
+
+			if (wrapper.classList.contains("loaded")) {
+				wrapper.classList.remove("loaded");
+				wrapper.addEventListener("transitionend", function () {
+					wrapper.innerHTML = `${quote} ${author}`;
+					wrapper.classList.add("loaded");
+				});
+			} else {
+				wrapper.innerHTML = `${quote} ${author}`;
+				wrapper.classList.add("loaded");
+			}
+
+			document.body.classList.add("loaded");
+		}
+
+		function showError(error) {
+			let errorMsg = `<div class="error">${error}</div>`;
+			wrapper.innerHTML = errorMsg;
+			wrapper.classList.add("loaded");
+		}
+
+		function tweetQuote() {
+			const tweet = wrapper.textContent;
+			window.open(
+				"https://twitter.com/intent/tweet?hashtags=quotes&related=freecodecamp&text=" +
+				tweet,
+				"twitter"
+			);
+		}
+
+		window.addEventListener("load", fetchQuote);
+		btnGetQuote.addEventListener("click", fetchQuote);
+		btnTweet.addEventListener("click", tweetQuote);
+
+	</script>
+</body>
+
+</html>
